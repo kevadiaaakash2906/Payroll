@@ -20,11 +20,12 @@ async function refreshEmployeeTable() {
   if (!showInactive) rows = rows.filter(e => e.isActive !== false);
   if (search) rows = rows.filter(e => e.name.toLowerCase().includes(search));
 
+  const srNoMap = getActiveSrNoMap();
   rows.forEach((e, i) => {
     const d = cache.departments.find(x => x.id === e.departmentId) || {};
     const tr = document.createElement("tr");
     tr.dataset.id = e.id;
-    tr.innerHTML = `<td>${e.srNo || ""}</td><td>${e.name}</td><td>${d.name || ""}</td><td>${d.payType || ""}</td><td>${e.isActive === false ? "Left" : "Active"}</td>`;
+    tr.innerHTML = `<td>${srNoMap.get(e.id) ?? "-"}</td><td>${e.name}</td><td>${d.name || ""}</td><td>${d.payType || ""}</td><td>${e.isActive === false ? "Left" : "Active"}</td>`;
     if (e.isActive === false) tr.style.opacity = "0.6";
     tr.addEventListener("click", () => {
       tbody.querySelectorAll("tr").forEach(r => r.classList.remove("selected"));
@@ -38,10 +39,9 @@ async function refreshEmployeeTable() {
 document.getElementById("emp-form").addEventListener("submit", async e => {
   e.preventDefault();
   const name = document.getElementById("emp-name").value.trim();
-  const srNo = parseInt(document.getElementById("emp-srno").value) || null;
   const deptId = document.getElementById("emp-dept").value;
   if (!name) return toast("Name is required", "error");
-  await db.collection("employees").add({ name, srNo, departmentId: deptId, isActive: true });
+  await db.collection("employees").add({ name, departmentId: deptId, isActive: true });
   document.getElementById("emp-form").reset();
   toast("Employee added");
   refreshEmployeeTable();
@@ -71,7 +71,6 @@ document.getElementById("btn-edit-emp").addEventListener("click", async () => {
   if (!emp) return;
   showModal("Edit Employee", `
     <div class="field"><label>Name</label><input type="text" id="edit-emp-name" value="${emp.name}" readonly style="background:#f5f5f5"></div>
-    <div class="field"><label>Sr No</label><input type="number" id="edit-emp-srno" value="${emp.srNo || ""}"></div>
     <div class="field"><label>Department</label><select id="edit-emp-dept">${cache.departments.map(d => `<option value="${d.id}" ${d.id===emp.departmentId?"selected":""}>${d.name}</option>`).join("")}</select></div>
   `, `
     <button class="btn-tonal" onclick="closeModal()">Cancel</button>
@@ -80,9 +79,8 @@ document.getElementById("btn-edit-emp").addEventListener("click", async () => {
 });
 
 window.saveEditEmployee = async function() {
-  const srNo = parseInt(document.getElementById("edit-emp-srno").value) || null;
   const deptId = document.getElementById("edit-emp-dept").value;
-  await db.collection("employees").doc(selectedEmpId).update({ srNo, departmentId: deptId });
+  await db.collection("employees").doc(selectedEmpId).update({ departmentId: deptId });
   closeModal();
   toast("Employee updated");
   refreshEmployeeTable();
