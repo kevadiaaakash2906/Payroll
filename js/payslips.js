@@ -109,6 +109,7 @@ async function exportExcelRegister() {
 
   const dateLabel = new Date(month).toLocaleDateString("en-GB", { month: "short", year: "2-digit" }).replace(" ", "-");
   const wb = XLSX.utils.book_new();
+  const srNoMap = getActiveSrNoMap();
 
   function buildSheet(ws, depts, title) {
     const data = [];
@@ -122,7 +123,7 @@ async function exportExcelRegister() {
         ? ["", "", "ભાવ", "નંગ", "પગાર", "ઉપાડ", "", "પગાર", "ઉપાડ"]
         : ["", "", "પગાર", "પગાર", "", "ઉપાડ", "", "પગાર", "ઉપાડ"]);
 
-      const emps = cache.employees.filter(e => e.departmentId === d.id && e.isActive !== false).sort((a,b)=>(a.srNo||0)-(b.srNo||0));
+      const emps = cache.employees.filter(e => e.departmentId === d.id && e.isActive !== false).sort((a,b)=>a.name.localeCompare(b.name));
       let deptTotal = 0;
       for (const e of emps) {
         const p = payroll.find(x => x.employeeId === e.id);
@@ -132,7 +133,7 @@ async function exportExcelRegister() {
           const nSub = Math.max(lines.length, 1);
           for (let i = 0; i < nSub; i++) {
             const row = ["", "", "", "", "", "", "", "", ""];
-            if (i === 0) { row[0] = e.srNo || ""; row[1] = e.name; }
+            if (i === 0) { row[0] = srNoMap.get(e.id) ?? ""; row[1] = e.name; }
             if (i < lines.length) { row[2] = lines[i].rate; row[3] = lines[i].pieces; }
             data.push(row);
           }
@@ -140,7 +141,7 @@ async function exportExcelRegister() {
           // Simplified: just add summary row
           data.push(["", "", "", "", p.grossSalary, p.withdrawal, "", p.netPayDue, p.netRecoverable]);
         } else {
-          data.push([e.srNo || "", e.name, p.basicSalary, p.grossSalary, "", p.withdrawal, "", p.netPayDue, p.netRecoverable]);
+          data.push([srNoMap.get(e.id) ?? "", e.name, p.basicSalary, p.grossSalary, "", p.withdrawal, "", p.netPayDue, p.netRecoverable]);
         }
         deptTotal += p.grossSalary || 0;
       }
