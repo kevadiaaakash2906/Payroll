@@ -36,12 +36,13 @@ async function renderDashboard() {
   }
 
   // Missing entries
+  const srNoMap = getActiveSrNoMap();
   const mtbody = document.querySelector("#dash-missing-table tbody");
   mtbody.innerHTML = "";
   for (const e of pending) {
     const d = depts.find(x => x.id === e.departmentId) || {};
     const tr = document.createElement("tr");
-    tr.innerHTML = `<td>${e.srNo || ""}</td><td>${e.name}</td><td>${d.name || ""}</td><td>${d.payType || ""}</td>`;
+    tr.innerHTML = `<td>${srNoMap.get(e.id) ?? "-"}</td><td>${e.name}</td><td>${d.name || ""}</td><td>${d.payType || ""}</td>`;
     tr.addEventListener("dblclick", () => {
       setMonthInput(document.getElementById("global-month"), month);
       location.hash = "payroll";
