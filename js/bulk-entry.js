@@ -20,7 +20,8 @@ async function loadBulkGrid() {
 
   await loadEmployees();
   const dept = cache.departments.find(d => d.id === deptId);
-  const emps = cache.employees.filter(e => e.departmentId === deptId && e.isActive !== false).sort((a,b)=>(a.srNo||0)-(b.srNo||0));
+  const emps = cache.employees.filter(e => e.departmentId === deptId && e.isActive !== false).sort((a,b)=>a.name.localeCompare(b.name));
+  const srNoMap = getActiveSrNoMap();
 
   bulkRowData = [];
   for (const e of emps) {
@@ -29,7 +30,7 @@ async function loadBulkGrid() {
     const prevBal = lastPay?.netRecoverable || 0;
     bulkRowData.push({
       empId: e.id,
-      srNo: e.srNo || "",
+      srNo: srNoMap.get(e.id) ?? "",
       name: e.name,
       rate: dept.defaultRate ?? "",
       pieces: "",
