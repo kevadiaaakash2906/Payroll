@@ -10,12 +10,12 @@
 // Copy the firebaseConfig object and paste it here, replacing the placeholders below.
 
 const firebaseConfig = {
-  apiKey: "AIzaSy...",           // <-- Get this from the Web app config on the same page
+  apiKey: "AIzaSyCHiejDTE6WBmihLpOz8a1bZH9b9_u34cc",
   authDomain: "payroll-423de.firebaseapp.com",
   projectId: "payroll-423de",
-  storageBucket: "payroll-423de.appspot.com",
+  storageBucket: "payroll-423de.firebasestorage.app",
   messagingSenderId: "218493880656",
-  appId: "1:218493880656:web:..."  // <-- Also from the Web app config
+  appId: "1:218493880656:web:4ef93328965ab0fc378455"
 };
 
 firebase.initializeApp(firebaseConfig);
