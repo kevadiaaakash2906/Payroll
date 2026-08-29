@@ -4,13 +4,18 @@
 
 // ==================== FIREBASE CONFIG ====================
 // REPLACE THESE with your own Firebase project settings
+// ==================== FIREBASE CONFIG ====================
+// Fill in the remaining values from your Firebase Console:
+// Project Settings → General → scroll down to "Your apps" → click the </> (Web) icon
+// Copy the firebaseConfig object and paste it here, replacing the placeholders below.
+
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSy...",           // <-- Get this from the Web app config on the same page
+  authDomain: "payroll-423de.firebaseapp.com",
+  projectId: "payroll-423de",
+  storageBucket: "payroll-423de.appspot.com",
+  messagingSenderId: "218493880656",
+  appId: "1:218493880656:web:..."  // <-- Also from the Web app config
 };
 
 firebase.initializeApp(firebaseConfig);
