@@ -44,6 +44,7 @@ document.getElementById("emp-form").addEventListener("submit", async e => {
   await db.collection("employees").add({ name, departmentId: deptId, isActive: true });
   document.getElementById("emp-form").reset();
   toast("Employee added");
+  cache.employees = [];          // invalidate cache
   refreshEmployeeTable();
 });
 
@@ -55,6 +56,7 @@ document.getElementById("btn-deactivate-emp").addEventListener("click", async ()
   if (!confirm("Mark as no longer working here? Past records stay intact.")) return;
   await db.collection("employees").doc(selectedEmpId).update({ isActive: false });
   toast("Employee marked as left");
+  cache.employees = [];          // invalidate cache
   refreshEmployeeTable();
 });
 
@@ -62,6 +64,7 @@ document.getElementById("btn-reactivate-emp").addEventListener("click", async ()
   if (!selectedEmpId) return toast("Select an employee first", "error");
   await db.collection("employees").doc(selectedEmpId).update({ isActive: true });
   toast("Employee reactivated");
+  cache.employees = [];          // invalidate cache
   refreshEmployeeTable();
 });
 
@@ -83,5 +86,6 @@ window.saveEditEmployee = async function() {
   await db.collection("employees").doc(selectedEmpId).update({ departmentId: deptId });
   closeModal();
   toast("Employee updated");
+  cache.employees = [];          // invalidate cache
   refreshEmployeeTable();
 };
