@@ -5,10 +5,14 @@
 let bulkRowData = [];
 
 async function renderBulkEntry() {
+  cache.departments = [];               // force fresh load
   await loadDepartments();
   const sel = document.getElementById("bulk-dept");
   const pwDepts = cache.departments.filter(d => d.payType === "Piecework");
   sel.innerHTML = pwDepts.map(d => `<option value="${d.id}">${d.name}</option>`).join("");
+  if (!pwDepts.length) {
+    document.getElementById("bulk-summary").textContent = "No Piecework departments found. Add one first.";
+  }
 }
 
 document.getElementById("bulk-load").addEventListener("click", loadBulkGrid);
@@ -18,10 +22,19 @@ async function loadBulkGrid() {
   const month = getMonthInput(document.getElementById("global-month"));
   if (!deptId) return toast("Select a department", "error");
 
+  cache.employees = [];                 // force fresh load
   await loadEmployees();
   const dept = cache.departments.find(d => d.id === deptId);
   const emps = cache.employees.filter(e => e.departmentId === deptId && e.isActive !== false).sort((a,b)=>a.name.localeCompare(b.name));
   const srNoMap = getActiveSrNoMap();
+
+  if (!emps.length) {
+    toast("No active employees in this department", "error");
+    if (bulkGridApi) { bulkGridApi.destroy(); bulkGridApi = null; }
+    document.getElementById("bulk-grid").innerHTML = "";
+    document.getElementById("bulk-summary").textContent = "0 employees — select a department with active employees";
+    return;
+  }
 
   bulkRowData = [];
   for (const e of emps) {
@@ -32,7 +45,7 @@ async function loadBulkGrid() {
       empId: e.id,
       srNo: srNoMap.get(e.id) ?? "",
       name: e.name,
-      rate: dept.defaultRate ?? "",
+      rate: dept?.defaultRate ?? "",
       pieces: "",
       gross: 0,
       withdrawal: payroll?.withdrawal ?? 0,
