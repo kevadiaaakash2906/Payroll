@@ -148,13 +148,14 @@
         </div>
 
         <div class="toolbar">
-          <div class="field"><label>Search</label><input type="text" id="emp-search" placeholder="Name..."></div>
-          <label class="toggle"><input type="checkbox" id="emp-show-inactive"><span>Show employees who've left</span></label>
-          <div class="spacer"></div>
-          <button class="btn-tonal" id="btn-edit-emp">Edit Selected</button>
-          <button class="btn-tonal" id="btn-deactivate-emp">Mark as Left</button>
-          <button class="btn-tonal" id="btn-reactivate-emp">Reactivate</button>
-        </div>
+  <div class="field"><label>Department</label><select id="emp-dept-filter"><option value="">All departments</option></select></div>
+  <div class="field"><label>Search</label><input type="text" id="emp-search" placeholder="Name..."></div>
+  <label class="toggle"><input type="checkbox" id="emp-show-inactive"><span>Show employees who've left</span></label>
+  <div class="spacer"></div>
+  <button class="btn-tonal" id="btn-edit-emp">Edit Selected</button>
+  <button class="btn-tonal" id="btn-deactivate-emp">Mark as Left</button>
+  <button class="btn-tonal" id="btn-reactivate-emp">Reactivate</button>
+</div>
 
         <div class="table-wrap">
           <table class="data-table selectable" id="emp-table">
