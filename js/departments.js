@@ -35,6 +35,7 @@ document.getElementById("dept-form").addEventListener("submit", async e => {
     });
     document.getElementById("dept-form").reset();
     toast("Department added");
+    cache.departments = [];      // invalidate cache
     refreshDeptTable();
   } catch (err) {
     toast(err.message, "error");
@@ -58,5 +59,6 @@ window.saveDeptRate = async function(deptId) {
   await db.collection("departments").doc(deptId).update({ defaultRate: rate });
   closeModal();
   toast("Rate updated");
+  cache.departments = [];        // invalidate cache
   refreshDeptTable();
 };
