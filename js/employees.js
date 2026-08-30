@@ -3,7 +3,7 @@
    ===================================================================== */
 
 async function renderEmployees() {
-  cache.employees = [];                 // force fresh load
+  cache.employees = [];
   await loadDepartments();
 
   // Add-form dropdown
@@ -18,6 +18,7 @@ async function renderEmployees() {
   }
 
   refreshEmployeeTable();
+  document.getElementById("emp-name").focus();
 }
 
 async function refreshEmployeeTable() {
@@ -38,12 +39,20 @@ async function refreshEmployeeTable() {
     const d = cache.departments.find(x => x.id === e.departmentId) || {};
     const tr = document.createElement("tr");
     tr.dataset.id = e.id;
+    tr.tabIndex = 0;
     tr.innerHTML = `<td>${srNoMap.get(e.id) ?? "-"}</td><td>${e.name}</td><td>${d.name || ""}</td><td>${d.payType || ""}</td><td>${e.isActive === false ? "Left" : "Active"}</td>`;
     if (e.isActive === false) tr.style.opacity = "0.6";
     tr.addEventListener("click", () => {
       tbody.querySelectorAll("tr").forEach(r => r.classList.remove("selected"));
       tr.classList.add("selected");
       selectedEmpId = e.id;
+    });
+    // Keyboard: Enter or Space selects row
+    tr.addEventListener("keydown", ev => {
+      if (ev.key === "Enter" || ev.key === " ") {
+        ev.preventDefault();
+        tr.click();
+      }
     });
     tbody.appendChild(tr);
   });
@@ -59,8 +68,13 @@ document.getElementById("emp-form").addEventListener("submit", async e => {
   toast("Employee added");
   cache.employees = [];
   refreshEmployeeTable();
+  document.getElementById("emp-name").focus();
 });
 
+// Enter in search box filters immediately
+document.getElementById("emp-search").addEventListener("keydown", e => {
+  if (e.key === "Enter") refreshEmployeeTable();
+});
 document.getElementById("emp-search").addEventListener("input", () => refreshEmployeeTable());
 document.getElementById("emp-show-inactive").addEventListener("change", () => refreshEmployeeTable());
 document.getElementById("emp-dept-filter")?.addEventListener("change", () => refreshEmployeeTable());
@@ -87,11 +101,11 @@ document.getElementById("btn-edit-emp").addEventListener("click", async () => {
   const emp = cache.employees.find(e => e.id === selectedEmpId);
   if (!emp) return;
   showModal("Edit Employee", `
-    <div class="field"><label>Name</label><input type="text" id="edit-emp-name" value="${emp.name}" readonly style="background:#f5f5f5"></div>
-    <div class="field"><label>Department</label><select id="edit-emp-dept">${cache.departments.map(d => `<option value="${d.id}" ${d.id===emp.departmentId?"selected":""}>${d.name}</option>`).join("")}</select></div>
+    <div class="field"><label>Name</label><input type="text" id="edit-emp-name" value="${emp.name}" readonly style="background:#f5f5f5" tabindex="0"></div>
+    <div class="field"><label>Department</label><select id="edit-emp-dept" tabindex="0">${cache.departments.map(d => `<option value="${d.id}" ${d.id===emp.departmentId?"selected":""}>${d.name}</option>`).join("")}</select></div>
   `, `
-    <button class="btn-tonal" onclick="closeModal()">Cancel</button>
-    <button class="btn-filled" onclick="saveEditEmployee()">Save</button>
+    <button class="btn-tonal" onclick="closeModal()" tabindex="0">Cancel</button>
+    <button class="btn-filled" onclick="saveEditEmployee()" tabindex="0">Save</button>
   `);
 });
 
