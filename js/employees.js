@@ -3,9 +3,20 @@
    ===================================================================== */
 
 async function renderEmployees() {
+  cache.employees = [];                 // force fresh load
   await loadDepartments();
+
+  // Add-form dropdown
   const deptSel = document.getElementById("emp-dept");
   deptSel.innerHTML = cache.departments.map(d => `<option value="${d.id}">${d.name} (${d.payType})</option>`).join("");
+
+  // Filter dropdown
+  const filterSel = document.getElementById("emp-dept-filter");
+  if (filterSel) {
+    filterSel.innerHTML = '<option value="">All departments</option>' +
+      cache.departments.map(d => `<option value="${d.id}">${d.name}</option>`).join("");
+  }
+
   refreshEmployeeTable();
 }
 
@@ -13,12 +24,14 @@ async function refreshEmployeeTable() {
   await loadEmployees();
   const showInactive = document.getElementById("emp-show-inactive").checked;
   const search = document.getElementById("emp-search").value.trim().toLowerCase();
+  const deptFilter = document.getElementById("emp-dept-filter")?.value || "";
   const tbody = document.querySelector("#emp-table tbody");
   tbody.innerHTML = "";
 
   let rows = cache.employees;
   if (!showInactive) rows = rows.filter(e => e.isActive !== false);
   if (search) rows = rows.filter(e => e.name.toLowerCase().includes(search));
+  if (deptFilter) rows = rows.filter(e => e.departmentId === deptFilter);
 
   const srNoMap = getActiveSrNoMap();
   rows.forEach((e, i) => {
@@ -44,19 +57,20 @@ document.getElementById("emp-form").addEventListener("submit", async e => {
   await db.collection("employees").add({ name, departmentId: deptId, isActive: true });
   document.getElementById("emp-form").reset();
   toast("Employee added");
-  cache.employees = [];          // invalidate cache
+  cache.employees = [];
   refreshEmployeeTable();
 });
 
 document.getElementById("emp-search").addEventListener("input", () => refreshEmployeeTable());
 document.getElementById("emp-show-inactive").addEventListener("change", () => refreshEmployeeTable());
+document.getElementById("emp-dept-filter")?.addEventListener("change", () => refreshEmployeeTable());
 
 document.getElementById("btn-deactivate-emp").addEventListener("click", async () => {
   if (!selectedEmpId) return toast("Select an employee first", "error");
   if (!confirm("Mark as no longer working here? Past records stay intact.")) return;
   await db.collection("employees").doc(selectedEmpId).update({ isActive: false });
   toast("Employee marked as left");
-  cache.employees = [];          // invalidate cache
+  cache.employees = [];
   refreshEmployeeTable();
 });
 
@@ -64,7 +78,7 @@ document.getElementById("btn-reactivate-emp").addEventListener("click", async ()
   if (!selectedEmpId) return toast("Select an employee first", "error");
   await db.collection("employees").doc(selectedEmpId).update({ isActive: true });
   toast("Employee reactivated");
-  cache.employees = [];          // invalidate cache
+  cache.employees = [];
   refreshEmployeeTable();
 });
 
@@ -86,6 +100,6 @@ window.saveEditEmployee = async function() {
   await db.collection("employees").doc(selectedEmpId).update({ departmentId: deptId });
   closeModal();
   toast("Employee updated");
-  cache.employees = [];          // invalidate cache
+  cache.employees = [];
   refreshEmployeeTable();
 };
